@@ -5,6 +5,7 @@ var getJSON = require('get-json');
 var sem = require('semaphore')(1);
 var https = require('https');
 var _ = require('lodash');
+var fs = require('fs');
 
 var result = [];
 
