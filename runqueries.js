@@ -9,69 +9,76 @@ var fs = require('fs');
 
 var result = [];
 
-getJSON('https://api.chess.com/pub/country/AR/players', function(error, response){
-    if (error) {
-        console.log(error);
-    } else {
-        console.log(response.players.length + " players.");
-        var done = _.after(response.players.length, function() {
-            fs.writeFile("chessOutput.json", JSON.stringify(result, null, 4), function (err) {
-                if (err) {
-                    return console.log(err);
-                }
-                console.log("The file was saved!");
-            });
-        });
-        response.players.forEach(function(loopPlayer) {
-            sem.take(function() {
-                https.get('https://api.chess.com/pub/player/' + loopPlayer, function(res){
-                    var body = '';
-                    res.on('data', function(chunk){
-                        body += chunk;
-                    });
-                    res.on('end', function(){
-                        if (res.statusCode != "200") {
-                            console.error(loopPlayer, "Got an error: ", res.statusCode);
-                            sem.leave();
-                        } else {
-                            var chessResponse = JSON.parse(body);
-                            https.get('https://api.chess.com/pub/player/' + loopPlayer + '/stats', function(res) {
-                                var body = '';
-                                res.on('data', function (chunk) {
-                                    body += chunk;
-                                });
-                                res.on('end', function () {
-                                    if (res.statusCode != "200") {
-                                        console.error(loopPlayer, "Got an error: ", res.statusCode);
-                                        sem.leave();
-                                    } else {
-                                        var statsResponse = JSON.parse(body);
-                                        var loopCompilation = {
-                                            username: loopPlayer,
-                                            details: chessResponse,
-                                            stats: statsResponse
-                                        };
-                                        result.push(loopCompilation);
-                                        console.log(loopPlayer, "Stats", statsResponse.chess_daily);
-                                        sem.leave();
-                                        done();
-                                    }
-                                });
-                            }).on('error', function(e){
-                                console.error(loopPlayer, "Got an error: ", e);
-                                sem.leave();
-                                done();
-                            });
-                        }
-                    });
-                }).on('error', function(e){
-                    console.error(loopPlayer, "Got an error: ", e);
-                    sem.leave();
-                    done();
+https.get('https://api.chess.com/pub/country/AR/players', function(res) {
+    var body = '';
+    res.on('data', function (chunk) {
+        body += chunk;
+    });
+    res.on('end', function () {
+        if (res.statusCode != "200") {
+            console.error("Got an error: ", res.statusCode);
+        } else {
+            var players = JSON.parse(body);
+            console.log(players.length + " players.");
+            var done = _.after(response.players.length, function () {
+                fs.writeFile("chessOutput.json", JSON.stringify(result, null, 4), function (err) {
+                    if (err) {
+                        return console.log(err);
+                    }
+                    console.log("The file was saved!");
                 });
             });
-        });
-    }
+            response.players.forEach(function (loopPlayer) {
+                sem.take(function () {
+                    https.get('https://api.chess.com/pub/player/' + loopPlayer, function (res) {
+                        var body = '';
+                        res.on('data', function (chunk) {
+                            body += chunk;
+                        });
+                        res.on('end', function () {
+                            if (res.statusCode != "200") {
+                                console.error(loopPlayer, "Got an error: ", res.statusCode);
+                                sem.leave();
+                            } else {
+                                var chessResponse = JSON.parse(body);
+                                https.get('https://api.chess.com/pub/player/' + loopPlayer + '/stats', function (res) {
+                                    var body = '';
+                                    res.on('data', function (chunk) {
+                                        body += chunk;
+                                    });
+                                    res.on('end', function () {
+                                        if (res.statusCode != "200") {
+                                            console.error(loopPlayer, "Got an error: ", res.statusCode);
+                                            sem.leave();
+                                        } else {
+                                            var statsResponse = JSON.parse(body);
+                                            var loopCompilation = {
+                                                username: loopPlayer,
+                                                details: chessResponse,
+                                                stats: statsResponse
+                                            };
+                                            result.push(loopCompilation);
+                                            console.log(loopPlayer, "Stats", statsResponse.chess_daily);
+                                            sem.leave();
+                                            done();
+                                        }
+                                    });
+                                }).on('error', function (e) {
+                                    console.error(loopPlayer, "Got an error: ", e);
+                                    sem.leave();
+                                    done();
+                                });
+                            }
+                        });
+                    }).on('error', function (e) {
+                        console.error(loopPlayer, "Got an error: ", e);
+                        sem.leave();
+                        done();
+                    });
+                });
+            });
+        }
+    });
 });
 
 function convertDate(epoch) {
