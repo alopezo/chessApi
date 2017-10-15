@@ -38,7 +38,7 @@ getJSON('https://api.chess.com/pub/country/AR/players', function(error, response
                                 chessResponse.name + "\t" +
                                 chessResponse.location + "\t" +
                                 chessResponse.status + "\n";
-                            console.log(loopPlayer, "OK", data);
+                            console.log(loopPlayer, "OK", chessResponse.name, chessResponse.location);
                             sem.leave();
                             done();
                         }
