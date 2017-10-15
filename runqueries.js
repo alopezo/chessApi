@@ -46,6 +46,7 @@ https.get('https://api.chess.com/pub/country/AR/players', function(res) {
                                     details: chessResponse,
                                 };
                                 result.push(loopCompilation);
+                                    console.log(loopPlayer, loopCompilation.details.name);
                                 sem.leave();
                                 done();
                                 // https.get('https://api.chess.com/pub/player/' + loopPlayer + '/stats', function (res) {
