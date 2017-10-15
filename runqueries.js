@@ -6,7 +6,7 @@ var sem = require('semaphore')(1);
 var https = require('https');
 var _ = require('lodash');
 
-var textContent = "username\tname\tlocation\tstatus\n";
+var result = [];
 
 getJSON('https://api.chess.com/pub/country/AR/players', function(error, response){
     if (error) {
@@ -14,7 +14,7 @@ getJSON('https://api.chess.com/pub/country/AR/players', function(error, response
     } else {
         console.log(response.players.length + " players.");
         var done = _.after(response.players.length, function() {
-            fs.writeFile("chessOutput.txt", textContent, function (err) {
+            fs.writeFile("chessOutput.json", JSON.stringify(result, null, 4), function (err) {
                 if (err) {
                     return console.log(err);
                 }
@@ -34,15 +34,23 @@ getJSON('https://api.chess.com/pub/country/AR/players', function(error, response
                             sem.leave();
                         } else {
                             var chessResponse = JSON.parse(body);
-                            textContent += loopPlayer + "\t" +
-                                chessResponse.name + "\t" +
-                                chessResponse.location + "\t" +
-                                chessResponse.status + "\t" +
-                                convertDate(chessResponse.last_online) + "\t" +
-                                convertDate(chessResponse.joined) + "\n";
-                            console.log(loopPlayer, "OK", chessResponse.name, chessResponse.location, convertDate(chessResponse.last_online));
-                            sem.leave();
-                            done();
+                            getJSON('https://api.chess.com/pub/player/' + loopPlayer + '/stats', function(error, statsResponse) {
+                                if (error) {
+                                    console.log(error);
+                                    sem.leave();
+                                    done();
+                                } else {
+                                    var loopCompilation = {
+                                        username: loopPlayer,
+                                        details: chessResponse,
+                                        stats: statsResponse
+                                    };
+                                    result.push(loopCompilation);
+                                    console.log(loopPlayer, "Stats", statsResponse.chess_daily);
+                                    sem.leave();
+                                    done();
+                                }
+                            });
                         }
                     });
                 }).on('error', function(e){
