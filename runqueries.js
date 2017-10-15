@@ -37,8 +37,10 @@ getJSON('https://api.chess.com/pub/country/AR/players', function(error, response
                             textContent += loopPlayer + "\t" +
                                 chessResponse.name + "\t" +
                                 chessResponse.location + "\t" +
-                                chessResponse.status + "\n";
-                            console.log(loopPlayer, "OK", chessResponse.name, chessResponse.location);
+                                chessResponse.status + "\t" +
+                                convertDate(chessResponse.last_online) + "\t" +
+                                convertDate(chessResponse.joined) + "\n";
+                            console.log(loopPlayer, "OK", chessResponse.name, chessResponse.location, convertDate(chessResponse.last_online));
                             sem.leave();
                             done();
                         }
@@ -52,3 +54,12 @@ getJSON('https://api.chess.com/pub/country/AR/players', function(error, response
         });
     }
 });
+
+function convertDate(epoch) {
+    if (epoch) {
+        var myDate = new Date(epoch*1000);
+        return myDate.toGMTString();
+    } else {
+        return "";
+    }
+}
