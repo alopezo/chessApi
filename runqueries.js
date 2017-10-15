@@ -1,7 +1,6 @@
 /**
  * Created by alo on 10/15/17.
  */
-var getJSON = require('get-json');
 var sem = require('semaphore')(1);
 var https = require('https');
 var _ = require('lodash');
