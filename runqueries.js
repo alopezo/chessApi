@@ -27,7 +27,7 @@ https.get('https://api.chess.com/pub/country/AR/players', function(res) {
                     console.log("The file was saved!");
                 });
             });
-            response.players.forEach(function (loopPlayer) {
+            players.forEach(function (loopPlayer) {
                 sem.take(function () {
                     https.get('https://api.chess.com/pub/player/' + loopPlayer, function (res) {
                         var body = '';
