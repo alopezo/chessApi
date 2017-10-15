@@ -48,7 +48,7 @@ https.get('https://api.chess.com/pub/country/AR/players', function(res) {
                                     });
                                     res.on('end', function () {
                                         if (res.statusCode != "200") {
-                                            console.error(loopPlayer, "Got an error: ", res.statusCode);
+                                            console.error(loopPlayer, "Got an error2: ", res.statusCode);
                                             sem.leave();
                                         } else {
                                             var statsResponse = JSON.parse(body);
