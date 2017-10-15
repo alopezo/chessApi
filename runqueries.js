@@ -19,7 +19,7 @@ https.get('https://api.chess.com/pub/country/AR/players', function(res) {
         } else {
             var players = JSON.parse(body);
             console.log(players.length + " players.");
-            var done = _.after(response.players.length, function () {
+            var done = _.after(players.length, function () {
                 fs.writeFile("chessOutput.json", JSON.stringify(result, null, 4), function (err) {
                     if (err) {
                         return console.log(err);
